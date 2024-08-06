@@ -273,3 +273,7 @@ contract GateBreaker{
     }
 }
 ```
+
+### Naught Coin
+abstract contract의 public virtual function은 impl contract에서 호출가능.
+다른 wallet approve로 권한 양도 후, transferFrom을 통해서 전송
